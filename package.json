@@ -1,0 +1,23 @@
+{
+  "name": "mix-bot",
+  "version": "1.0.0",
+  "description": "A self-hosted Discord bot for announcing Mixer streams",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/russjr08/Mixbot.git"
+  },
+  "author": "Russell Richardson",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/russjr08/Mixbot/issues"
+  },
+  "homepage": "https://github.com/russjr08/Mixbot#readme",
+  "dependencies": {
+    "carina": "^0.11.2",
+    "ws": "^7.1.1"
+  }
+}
