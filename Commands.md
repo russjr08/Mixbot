@@ -12,6 +12,7 @@ _(Replace ! with your custom prefix if you've set one)_
   + The default is 
     > Hey @everyone, `%USERNAME%` is now live on Mixer! Check them out at https://mixer.com/%USERNAME%
   + _Tip:_ Change @everyone to a role that your server members can opt in and out of to prevent excessive notifications!
+  + Passing in `default` to this command will cause it to revert to the default template listed above.
 
 * !announceat - Sets the room that the bot will announce streamer notifications at (_don't include the #_!)
 

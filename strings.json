@@ -1,0 +1,4 @@
+{
+    "SERVER_JOIN": "Hi! I am Mixbot, and thanks for having me! Go ahead and run !commands to see what I can do.\n\n_Hint: Start with !announceat and !register_",
+    "DEFAULT_ANNOUNCEMENT": "Hey @everyone, %USERNAME% is now live on Mixer! Check them out at https://mixer.com/%USERNAME%"
+}
