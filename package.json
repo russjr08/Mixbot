@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/russjr08/Mixbot#readme",
   "dependencies": {
+    "axios": "^0.19.0",
     "carina": "^0.11.2",
     "discord.js": "^11.5.1",
     "ws": "^7.1.1"

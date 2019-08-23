@@ -9,14 +9,29 @@ const Strings = require('./strings.json');
 
 const fs = require('fs');
 
+const axios = require('axios');
+
 Carina.WebSocket = ws;
+const ca = new Carina({ isBot: true }).open();
 
 const CHANNEL_LOOKUP_TEMPLATE = "https://mixer.com/api/v1/channels/username?fields=id"
+const ID_TO_CHANNEL_TEMPLATE = "https://mixer.com/api/v1/channels/id?fields=token"
 
 var self = this;
 this.servers = {};
 
 // Mixer Integration
+
+function startListening(id) { 
+    ca.subscribe(`channel:${id}:update`, data => {
+        if(data.online != undefined && data.online) {
+            console.log(`Live Event for ${id} is inbound!`);
+            announceStreamer(id);
+        }
+    });
+
+    console.log(`Subscribed to ${id}'s Mixer channel events.`);
+}
 
 // Discord Integration
 
@@ -27,7 +42,13 @@ client.on('ready', () => {
 
 client.on('message', message => {
     if(message.content === '!debug') {
-        message.channel.send(`This server's ID is ${self.servers[message.guild.id].id}, and data is \`${JSON.stringify(getServer(message.guild))}\``);
+        var server = getServer(message.guild);
+        server.wumbo = true;
+        message.channel.send(`This server's ID is ${self.servers[message.guild.id].id}, and data is \`${JSON.stringify(server)}\``);
+    }
+
+    if(!message.member.hasPermission("ADMINISTRATOR")) {
+        return;
     }
 
     var server = getServer(message.guild);
@@ -63,6 +84,26 @@ client.on('message', message => {
                 message.channel.send(`I will now use the following template: \`${announcement_template}\` for this server.`);
             }
         }
+
+        if(command === "register") {
+            var name = message.content.split(" ")[1];
+            
+            axios.get(CHANNEL_LOOKUP_TEMPLATE.replace("username", name))
+                .then((response) => {
+                    message.channel.send(`Registered ${name} (${response.data.id}) for stream notifications on this server.`);
+                    if(server.streamers == null) {
+                        server.streamers = []
+                    }
+
+                    server.streamers.push(response.data.id)
+                    startListening(response.data.id)
+                })
+                .catch((err) => {
+                    message.channel.send(`Failed to register ${name}.`);
+
+                })
+            
+        }
     }
 });
 
@@ -82,6 +123,8 @@ client.on('guildCreate', (guild) => {
 
     let channel = client.channels.get(guild.systemChannelID || channelID);
     channel.send(Strings.SERVER_JOIN).catch(console.error);
+
+    self.servers[guild.id] = {id: guild.id};
 });
 
 client.login(config.token);
@@ -94,6 +137,29 @@ function initBot() {
     })
 }
 
+function announceStreamer(id) {
+    Object.keys(self.servers).forEach((serverID) => {
+        var server = self.servers[serverID];
+        if(server.streamers != undefined && server.announce_channel != undefined && server.streamers.includes(id)) {
+            axios.get(ID_TO_CHANNEL_TEMPLATE.replace('id', id))
+                .then((response) => {
+                    var message = server.announcement_template || Strings.DEFAULT_ANNOUNCEMENT;
+                    message = message.replace(/%USERNAME%/g, response.data.token);
+
+                    var guild = client.guilds.get(serverID);
+
+                    guild.channels.forEach((channel) => {
+                        if(channel.name === server.announce_channel && channel.type === "text") {
+                            channel.send(message);
+                        }
+                    })
+                });
+            
+        }
+    });
+    
+}
+
 function initializeServer(guild) {
     fs.access(`./servers/${guild.id}.json`, (err) => {
         if(!err) {
@@ -102,7 +168,13 @@ function initializeServer(guild) {
                 if(!err) {
                     var server = JSON.parse(data);
                     self.servers[server.id] = server;
-                    console.log(self.servers[server.id]);
+
+                    if(server.streamers != undefined) {
+                        server.streamers.forEach((streamId) => {
+                            startListening(streamId);
+                        });
+                    }
+                    
                 }
             })
         } else {
@@ -120,6 +192,7 @@ function getServerById(id) {
     return self.servers[id];
 }
 
+// Set the server to Wumbo
 function saveServer(server) {
     fs.writeFileSync(`./servers/${server.id}.json`, JSON.stringify(server));
 }
