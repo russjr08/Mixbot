@@ -1,4 +1,10 @@
-# Welcome to Mixbot!
+# Project has been archived
+Mixer closed their doors on July 22, 2020 -- and have recommended their viewers move over to Facebook Gaming. This project is being archived due to the service being closed. 
+
+RIP Mixer.
+
+
+## Welcome to Mixbot!
 
 Hello! Welcome to my repository. Mixbot is designed to be a Discord bot that broadcasts whenever a Mixer streamer (registered with the server) goes live!
 
